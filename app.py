@@ -10,7 +10,21 @@ from nltk.tokenize import WordPunctTokenizer
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 import itertools
 import warnings
+from dotenv import load_dotenv
+from PyPDF2 import PdfReader
+from langchain.text_splitter import CharacterTextSplitter
+from langchain.embeddings import OpenAIEmbeddings
+from langchain.vectorstores import FAISS
+from langchain.chat_models import ChatOpenAI
+from langchain.memory import ConversationBufferMemory
+from langchain.chains import ConversationalRetrievalChain
+from htmlTemplates import css, bot_template_anis,bot_template_prabowo,bot_template_ganjar, user_template
 warnings.filterwarnings("ignore")
+
+bawah = '''footer {visibility: hidden;}
+header {visibility: hidden;}
+* {font-family: 'Readex Pro';}'''
+st.markdown(f'<style>{bawah}</style>', unsafe_allow_html=True)
 
 labels = ['Neutral', 'Positif','SARA','Sindiran','Diskriminasi']
 data_pilih = ['data_train_anis', 'data_train_prabowo','data_train_ganjar']
@@ -172,6 +186,86 @@ def preprocess_text(text):
     transformed_text = transformed_text.lower().strip()
     return transformed_text   
 
+def get_pdf_text(pdf_docs):
+    pdf_reader = PdfReader(pdf_docs)
+    text = ""
+    for page in pdf_reader.pages:
+        text += page.extract_text()
+    return text
+
+
+def get_text_chunks(text):
+    text_splitter = CharacterTextSplitter(
+        separator="\n",
+        chunk_size=1000,
+        chunk_overlap=200,
+        length_function=len
+    )
+    chunks = text_splitter.split_text(text)
+    return chunks
+
+def get_vectorstore(text_chunks):
+    embeddings = OpenAIEmbeddings()
+    #embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
+    vectorstore = FAISS.from_texts(texts=text_chunks, embedding=embeddings)
+    return vectorstore
+
+def get_conversation_chain(vectorstore):
+    llm = ChatOpenAI()
+    #llm = HuggingFaceHub(repo_id="google/flan-t5-xxl", model_kwargs={"temperature":0.5, "max_length":512})
+
+    memory = ConversationBufferMemory(
+        memory_key='chat_history', return_messages=True)
+    conversation_chain = ConversationalRetrievalChain.from_llm(
+        llm=llm,
+        retriever=vectorstore.as_retriever(),
+        memory=memory
+    )
+    return conversation_chain
+
+def handle_userinput_anis(user_question):
+    response = st.session_state.conversation({'question': user_question})
+    st.session_state.chat_history = response['chat_history']
+
+    for i, message in enumerate(st.session_state.chat_history):
+        if i % 2 == 0:
+            st.write(user_template.replace(
+                "{{MSG}}", message.content), unsafe_allow_html=True)
+        else:
+            st.write(bot_template_anis.replace(
+                "{{MSG}}", message.content), unsafe_allow_html=True)
+def handle_userinput_prabowo(user_question):
+    response = st.session_state.conversation({'question': user_question})
+    st.session_state.chat_history = response['chat_history']
+
+    for i, message in enumerate(st.session_state.chat_history):
+        if i % 2 == 0:
+            st.write(user_template.replace(
+                "{{MSG}}", message.content), unsafe_allow_html=True)
+        else:
+            st.write(bot_template_prabowo.replace(
+                "{{MSG}}", message.content), unsafe_allow_html=True)
+
+def handle_userinput_ganjar(user_question):
+    response = st.session_state.conversation({'question': user_question})
+    st.session_state.chat_history = response['chat_history']
+
+    for i, message in enumerate(st.session_state.chat_history):
+        if i % 2 == 0:
+            st.write(user_template.replace(
+                "{{MSG}}", message.content), unsafe_allow_html=True)
+        else:
+            st.write(bot_template_ganjar.replace(
+                "{{MSG}}", message.content), unsafe_allow_html=True)
+            
+
+
+anisfile = 'assets/1241-amin-visi-misi-program.pdf'
+prabowofile = 'assets/PRABOWOGIBRAN_VISI_MISI.pdf'
+ganjarfile = 'assets/Buku-Visi-Misi-Ganjar-Mahfud.pdf'
+
+
+
 
 # Main
 def main():
@@ -179,8 +273,8 @@ def main():
         st.markdown("<h2 style='text-align: center;'>Dashboard Menu</h2>", unsafe_allow_html=True)
         selected = option_menu(
             menu_title=None,  # required
-            options=["Home", "Sentiment Analysis", "Sentiment Comment Detector", "About"],  # required
-            icons=["house-check-fill", "emoji-laughing-fill", "chat-square-quote-fill", "person-vcard-fill"],  # optional
+            options=["Home", "Sentiment Analysis", "Sentiment Comment Detector","ChatBot Tanya Capres", "About"],  # required
+            icons=["house-check-fill", "emoji-laughing-fill", "chat-square-quote-fill","robot", "person-vcard-fill"],  # optional
             menu_icon="cast",  # optional
             default_index=0,  # optional
             styles={
@@ -200,6 +294,7 @@ def main():
                     - Melihat Hasil Analisis Sentimen Netizen Twiter Hasil Model SVM Pasca debat pamungkas Pilpres 2024.
                     - Memasukan kalimat kepada semua Capres dan akan diberikan apakah kalimat tersebut positif, negatif, atau netral.
                     - Mengunggah file CSV berisi komentar untuk prediksi banyak komentar sekaligus.
+                    - **Fitur ChatBot Tanya Capres**, akan memudahkan anda untuk mengetahui visi dan misi dari masing-masing pasangan calon presiden dan wakil presiden. Tanpa membaca buku visi misi, anda dapat bertanya kepada chatbot dengam mudah.
                 """)
         st.write('Selamat menjelajahi!')
 
@@ -288,7 +383,7 @@ def main():
         st.markdown("<h2 style='text-align: center;'>Dashboard Menu</h2>", unsafe_allow_html=True)
         selected_sentimen = option_menu(
             menu_title=None,  # required
-            options=["Anis Baswedan", "Prabowo Subianto", "Ganjar Pranowo"],  # required
+            options=["Anies Baswedan", "Prabowo Subianto", "Ganjar Pranowo"],  # required
             icons=["1-circle-fill", "2-circle-fill", "3-circle-fill", "info-circle"],
             orientation="horizontal",# optional
             menu_icon="cast",  # optional
@@ -304,7 +399,7 @@ def main():
         
 
         # Tampilkan wordcloud
-        if selected_sentimen == "Anis Baswedan":
+        if selected_sentimen == "Anies Baswedan":
             
                     # Membuat kolom dengan layout 1:2
             col1, col2 = st.columns([1, 2])
@@ -535,8 +630,92 @@ def main():
                 :white_check_mark: Numerical models like WRF utilize atmospheric observational data, including air temperature, humidity, wind speed, and air pressure, to generate future weather forecasts. 
                 This is achieved through the use of Python and Fortran programming languages.
                 ''')
-        st.divider()        
-   
+        st.divider()       
+    
+    if selected == "ChatBot Tanya Capres": 
+        load_dotenv()
+        st.write(css, unsafe_allow_html=True)
+
+        if "conversation" not in st.session_state:
+            st.session_state.conversation = None
+        if "chat_history" not in st.session_state:
+            st.session_state.chat_history = None
+        
+        st.header("Chat Bot Tanya Seputar Visi dan Misi Pasangan Calon Presiden dan Wakil Indonesia 2024")
+        st.info("Silahkan bertanya kepada ChatBot tentang visi dan misi pasangan calon presiden dan wakil Indonesia 2024. ChatBot akan memberikan jawaban berdasarkan data yang telah di training.")
+        st.markdown("<h2 style='text-align: center;'>Mau Tanya Siapa?</h2>", unsafe_allow_html=True)
+        selected_sentimen = option_menu(
+            menu_title=None,  # required
+            options=["Anies-Muhaimin", "Prabowo-Gibran", "Ganjar-Mahfud"],  # required
+            icons=["1-circle-fill", "2-circle-fill", "3-circle-fill", "info-circle"],
+            orientation="horizontal",# optional
+            menu_icon="cast",  # optional
+            default_index=0,  # optional
+            styles={
+                "nav-link": {
+                    "font-family": "calibri",
+                    "font-size": "18px" 
+                },
+            },
+        )
+        
+        if selected_sentimen == "Anies-Muhaimin":
+            st.subheader("Tanya: Anies Baswedan - Muhaimin Iskandar")
+            user_question_anis = st.chat_input("Ayo tanyain dong!!!;    contoh: Apa Visi dan Misi Anies Muhaimin?")
+            if user_question_anis:
+                handle_userinput_anis(user_question_anis)
+            # get pdf text
+            raw_text_anis = get_pdf_text(anisfile)
+
+            # get the text chunks
+            text_chunks_anis = get_text_chunks(raw_text_anis)
+            
+            # create vector store
+            vectorstore_anis = get_vectorstore(text_chunks_anis)
+
+            # create conversation chain
+            st.session_state.conversation = get_conversation_chain(
+                vectorstore_anis)
+        
+        
+        if selected_sentimen == "Prabowo-Gibran":
+            st.subheader("Tanya: Prabowo Subianto - Gibran Rakabuming")
+            user_question_prabowo = st.chat_input("Ayo tanyain dong!!!;    contoh: Apa Visi dan Misi Prabowo Gibran?")
+            if user_question_prabowo:
+                handle_userinput_prabowo(user_question_prabowo)
+            # get pdf text
+            raw_text_prabowo = get_pdf_text(prabowofile)
+            
+            # get the text chunks
+            text_chunks_prabowo = get_text_chunks(raw_text_prabowo)
+            
+            # create vector store
+            vectorstore_prabowo = get_vectorstore(text_chunks_prabowo)
+            
+            # create conversation chain
+            st.session_state.conversation = get_conversation_chain(
+                vectorstore_prabowo)
+        
+        if selected_sentimen == "Ganjar-Mahfud":
+            st.subheader("Tanya: Ganjar Pranowo - Mahfud MD")
+            user_question_ganjar = st.chat_input("Ayo tanyain dong!!!;    contoh: Apa Visi dan Misi Ganjar Mahfud?")
+            if user_question_ganjar:
+                handle_userinput_ganjar(user_question_ganjar)
+            
+            # get pdf text
+            raw_text_ganjar = get_pdf_text(ganjarfile)
+            
+            # get the text chunks
+            text_chunks_ganjar = get_text_chunks(raw_text_ganjar)
+            
+            # create vector store
+            vectorstore_ganjar = get_vectorstore(text_chunks_ganjar)
+            
+            # create conversation chain
+            st.session_state.conversation = get_conversation_chain(
+                vectorstore_ganjar)         
+
+        
 
         
 
