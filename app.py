@@ -22,6 +22,9 @@ from langchain.chains import ConversationalRetrievalChain
 from htmlTemplates import css, bot_template_anis,bot_template_prabowo,bot_template_ganjar, user_template
 warnings.filterwarnings("ignore")
 
+st.set_page_config(page_title="Sentiment Analysis By Putu",
+                       page_icon=":books:")
+
 bawah = '''footer {visibility: hidden;}
 header {visibility: hidden;}
 * {font-family: 'Readex Pro';}'''
