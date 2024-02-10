@@ -275,7 +275,7 @@ def main():
                             hasil_prediksi = prediksi_sentimen(df["output"])
                             df['Sentiment'] = ['Komentar Negatif' if pred == 0 else 'Komentar Neutral' if pred == 1 else 'Komentar Positif' for pred in hasil_prediksi]
                             # Tampilkan hasil prediksi pada streamlit
-                            st.dataframe(pd.DataFrame({"Komentar": df["output"], "Sentiment": df['Sentiment']}))
+                            st.dataframe(pd.DataFrame({"Komentar": df.iloc[:, 0], "Sentiment": df['Sentiment']}))
 
                             
 
