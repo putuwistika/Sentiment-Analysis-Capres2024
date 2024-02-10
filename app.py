@@ -17,27 +17,27 @@ data_pilih = ['data_train_anis', 'data_train_prabowo','data_train_ganjar']
 
 # Data training
 #Anis Baswedan
-data_train_anis = pd.read_csv('https://raw.githubusercontent.com/putuwistika/Sentiment-Analysis-Capres2024/main/Data_Train/Train_Anis.csv?token=GHSAT0AAAAAACNBEGTVEH6JEJP7PJPNJYD6ZOGKZCQ')
+data_train_anis = pd.read_csv('Data_Train/Train_Anis.csv')
 data_train_anis.rename(columns={'Pornografi': 'SARA'}, inplace=True)
-df = pd.read_csv("https://raw.githubusercontent.com/putuwistika/Sentiment-Analysis-Capres2024/main/Data_Train/Tain_Anis.csv?token=GHSAT0AAAAAACNBEGTUNPN4LJRZDKSRRLPOZOGKW4A")
+df = pd.read_csv("Data_Train/Tain_Anis.csv")
 data_train_anis = df[['Neutral', 'Positif']].join(data_train_anis)
 ambil = ['full_text','username','created_at','clean','english', 'sentimen','Neutral', 'Positif','SARA','Ancaman','Sindiran','Diskriminasi']
 
 data_train_anis = data_train_anis[ambil]
 
 #Ganjar Pranowo
-data_train_ganjar = pd.read_csv('https://raw.githubusercontent.com/putuwistika/Sentiment-Analysis-Capres2024/main/Data_Train/Train_Ganjar.csv?token=GHSAT0AAAAAACNBEGTU7DG2K3QQMVN7NMWSZOGKZRQ')
+data_train_ganjar = pd.read_csv('Data_Train/Train_Ganjar.csv')
 data_train_ganjar.rename(columns={'Pornografi': 'SARA'}, inplace=True)
-df = pd.read_csv("https://raw.githubusercontent.com/putuwistika/Sentiment-Analysis-Capres2024/main/Data_Train/Tain_Ganjar.csv?token=GHSAT0AAAAAACNBEGTV5KN2PGJWUCBXXHQEZOGKX5Q")
+df = pd.read_csv("Data_Train/Tain_Ganjar.csv")
 data_train_ganjar = df[['Neutral', 'Positif']].join(data_train_ganjar)
 ambil = ['full_text','username','created_at','clean','english', 'sentimen','Neutral', 'Positif','SARA','Ancaman','Sindiran','Diskriminasi']
 
 data_train_ganjar = data_train_ganjar[ambil]
 
 #Prabowo Subianto
-data_train_prabowo = pd.read_csv('https://raw.githubusercontent.com/putuwistika/Sentiment-Analysis-Capres2024/main/Data_Train/Train_Prabowo.csv?token=GHSAT0AAAAAACNBEGTV4ONF4S2RNNMB7QJCZOGK2CQ')
+data_train_prabowo = pd.read_csv('Data_Train/Train_Prabowo.csv')
 data_train_prabowo.rename(columns={'Pornografi': 'SARA'}, inplace=True)
-df = pd.read_csv("https://raw.githubusercontent.com/putuwistika/Sentiment-Analysis-Capres2024/main/Data_Train/Tain_Prabowo.csv?token=GHSAT0AAAAAACNBEGTVMML6XTYQLP7TC54QZOGKYPA")
+df = pd.read_csv("Data_Train/Tain_Prabowo.csv")
 data_train_prabowo = df[['Neutral', 'Positif']].join(data_train_prabowo)
 ambil = ['full_text','username','created_at','clean','english', 'sentimen','Neutral', 'Positif','SARA','Ancaman','Sindiran','Diskriminasi']
 
