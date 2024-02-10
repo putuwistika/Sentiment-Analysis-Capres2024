@@ -180,7 +180,7 @@ def main():
         selected = option_menu(
             menu_title=None,  # required
             options=["Home", "Sentiment Analysis", "Sentiment Comment Detector", "About"],  # required
-            icons=["house", "blockquote-left", "chat-left-text", "info-circle"],  # optional
+            icons=["house-check-fill", "emoji-laughing-fill", "chat-square-quote-fill", "person-vcard-fill"],  # optional
             menu_icon="cast",  # optional
             default_index=0,  # optional
             styles={
@@ -289,7 +289,7 @@ def main():
         selected_sentimen = option_menu(
             menu_title=None,  # required
             options=["Anis Baswedan", "Prabowo Subianto", "Ganjar Pranowo"],  # required
-            icons=["house", "blockquote-left", "chat-left-text", "info-circle"],
+            icons=["1-circle-fill", "2-circle-fill", "3-circle-fill", "info-circle"],
             orientation="horizontal",# optional
             menu_icon="cast",  # optional
             default_index=0,  # optional
