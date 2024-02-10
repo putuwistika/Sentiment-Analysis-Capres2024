@@ -651,6 +651,7 @@ def main():
         
         st.header("Chat Bot Tanya Seputar Visi dan Misi Pasangan Calon Presiden dan Wakil Indonesia 2024")
         st.info("Silahkan bertanya kepada ChatBot tentang visi dan misi pasangan calon presiden dan wakil Indonesia 2024. ChatBot akan memberikan jawaban berdasarkan data yang telah di training.")
+        st.error('Mohon Maaf Jika Terjadi Error, Silakan Refresh Kembali!', icon="🚨")
         st.markdown("<h2 style='text-align: center;'>Mau Tanya Siapa?</h2>", unsafe_allow_html=True)
         selected_sentimen = option_menu(
             menu_title=None,  # required
