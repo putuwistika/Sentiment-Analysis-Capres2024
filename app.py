@@ -6,6 +6,7 @@ from textpreprocesing import DataPreprocessing
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import re
+import time
 from nltk.tokenize import WordPunctTokenizer
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 import itertools
@@ -350,28 +351,34 @@ def main():
                 if uploaded_file is not None:
                     try:
                         # Membaca data dari file CSV dengan kolom default "Komentar"
-                        df = pd.read_csv(uploaded_file)
-                        # Preprocess comments
-                        comment_preprocessing = DataPreprocessing(df)
-                        comment_preprocessing.text_preprocessing(df.columns[0], 'output')
+                        with st.spinner('Tunggu Sebentar yah, lagi proses'):
+                                time.sleep(3)
+                                df = pd.read_csv(uploaded_file)
+                                # Preprocess comments
+                                comment_preprocessing = DataPreprocessing(df)
+                                comment_preprocessing.text_preprocessing(df.columns[0], 'output')
+                        st.success('Tuh Kan cepet, Sudah Selesai!')
 
                         # Tombol prediksi
                         if st.button("Prediksi File CSV"):
-                            # Lakukan prediksi
-                            def prediksi_sentimen(df_content):
-                        
-                                vectorizer = pickle.load(open("vectorizer_tfidf_prabowo.pkl", "rb"))  
-                                df_content = vectorizer.transform(df_content)
+                                # Lakukan prediksi
+                                def prediksi_sentimen(df_content):
+                            
+                                    vectorizer = pickle.load(open("vectorizer_tfidf_prabowo.pkl", "rb"))  
+                                    df_content = vectorizer.transform(df_content)
+                                    
+                                    svc = pickle.load(open("model_prabowo_svm.pkl", "rb"))
+                                    pred_sentimen = svc.predict(df_content)
+                                    
+                                    return pred_sentimen
+                                # Lakukan prediksi
                                 
-                                svc = pickle.load(open("model_prabowo_svm.pkl", "rb"))
-                                pred_sentimen = svc.predict(df_content)
+                                hasil_prediksi = prediksi_sentimen(df["output"])
+                                df['Sentiment'] = ['Komentar Negatif' if pred == 0 else 'Komentar Neutral' if pred == 1 else 'Komentar Positif' for pred in hasil_prediksi]
+                                # Tampilkan hasil prediksi pada streamlit
+                                st.success('Berikut Hasil Sentimentasi Detector')
+                                st.dataframe(pd.DataFrame({"Komentar": df.iloc[:, 0], "Sentiment": df['Sentiment']}))
                                 
-                                return pred_sentimen
-                            # Lakukan prediksi
-                            hasil_prediksi = prediksi_sentimen(df["output"])
-                            df['Sentiment'] = ['Komentar Negatif' if pred == 0 else 'Komentar Neutral' if pred == 1 else 'Komentar Positif' for pred in hasil_prediksi]
-                            # Tampilkan hasil prediksi pada streamlit
-                            st.dataframe(pd.DataFrame({"Komentar": df.iloc[:, 0], "Sentiment": df['Sentiment']}))
 
                             
 
